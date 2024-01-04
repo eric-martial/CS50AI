@@ -117,32 +117,35 @@ def minimax(board):
     optimal_actions = set()
 
     if player(board) == X:
-        # Prioritize blocking immediate threats
+        # We block immediate threats
         for action in actions(board):
             new_board = result(board, action)
-            if winner(new_board) == O:  # Check if opponent has a winning move
-                return action  # Immediately block the threat
+            if winner(new_board) == X:
+                return action
 
-        lowest = -math.inf
-        for action in actions(board):
-            v = maxValue(result(board, action))
-            if v > lowest:
-                optimal_actions.add(action)
-                lowest = v
-
-    if player(board) == O:
-        # Prioritize blocking immediate threats
-        for action in actions(board):
-            new_board = result(board, action)
-            if winner(new_board) == O:  # Check if opponent has a winning move
-                return action  # Immediately block the threat
-
-        highest = math.inf
+        highest = -math.inf
         for action in actions(board):
             v = minValue(result(board, action))
-            if v < highest:
-                optimal_actions.add(action)
+            if v > highest:
+                optimal_actions = {action}
                 highest = v
+            elif v == highest:
+                optimal_actions.add(action)
+
+    if player(board) == O:
+        for action in actions(board):
+            new_board = result(board, action)
+            if winner(new_board) == O:
+                return action
+
+        lowest = math.inf
+        for action in actions(board):
+            v = maxValue(result(board, action))
+            if v < lowest:
+                optimal_actions = {action}
+                lowest = v
+            elif v == lowest:
+                optimal_actions.add(action)
 
     if optimal_actions:
         return optimal_actions.pop()
@@ -158,8 +161,8 @@ def maxValue(board):
 
     for action in actions(board):
         new_board = result(board, action)
-        if winner(new_board) == O:  # Check for opponent's winning move
-            return -1  # Immediately return its utility
+        if winner(new_board) == O:
+            return utility(new_board)
         v = max(v, minValue(result(board, action)))
 
     return v
@@ -173,8 +176,8 @@ def minValue(board):
 
     for action in actions(board):
         new_board = result(board, action)
-        if winner(new_board) == O:  # Check for opponent's winning move
-            return -1  # Immediately return its utility
+        if winner(new_board) == X:
+            return utility(new_board)
         v = min(v, maxValue(result(board, action)))
 
     return v
